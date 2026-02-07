@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hookstep Battle Pro</title>
+    <style>
+        :root {
+            --groom-color: #0056b3;
+            --bride-color: #d81b60;
+            --bg: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --text: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+            color: var(--text);
+        }
+
+        /* === BATTLE SCOREBOARD === */
+        #battle-score {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(180deg, #000 0%, #1a1a1a 100%);
+            border-bottom: 3px solid #333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .score-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        /* === MENU === */
+        #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 40px 0;
+            text-align: center;
+            background: linear-gradient(45deg, var(--groom-color), var(--bride-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin: 20px 0 15px 0;
+            opacity: 0.7;
+            letter-spacing: 2px;
+        }
+
+        .set-row { 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .btn {
+            padding: 25px 35px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            flex: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .groom { background: linear-gradient(135deg, #0056b3 0%, #003d82 100%); }
+        .bride { background: linear-gradient(135deg, #d81b60 0%, #a8154a 100%); }
+        
+        .reset-btn { 
+            background: linear-gradient(135deg, #666 0%, #444 100%);
+            font-size: 1rem;
+            min-width: 200px;
+            margin: 20px 5px;
+        }
+
+        /* === GAME SCREEN === */
+        #game { 
+            display: none; 
+            flex-direction: column; 
+            height: 100%; 
+            padding: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            gap: 15px;
+        }
+
+        .timer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #side-label { 
+            font-size: 1.8rem; 
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #timer { 
+            font-size: 4rem; 
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 30px #cc0000;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        #timer.warning { 
+            color: #ff4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        #score { 
+            font-size: 1.8rem; 
+            font-weight: 900;
+            text-align: right;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            transition: width 0.3s;
+            box-shadow: 0 0 10px rgba(46,204,113,0.5);
+        }
+
+        .card {
+            flex: 1;
+            background: var(--card-bg);
+            border: 3px solid #444;
+            border-radius: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+            max-height: 50vh;
+        }
+
+        .card.flash-success {
+            animation: flashGreen 0.5s;
+        }
+
+        .card.flash-pass {
+            animation: flashYellow 0.5s;
+        }
+
+        @keyframes flashGreen {
+            0%, 100% { background: var(--card-bg); }
+            50% { background: rgba(39, 174, 96, 0.3); transform: scale(1.02); }
+        }
+
+        @keyframes flashYellow {
+            0%, 100% { background: var(--card-bg); }
+            50% { background: rgba(241, 196, 15, 0.3); transform: scale(1.02); }
+        }
+
+        #song-name { 
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            margin-bottom: 20px; 
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        #movie-name { 
+            font-size: 1.8rem; 
+            color: #999;
+            font-weight: 500;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .songs-remaining {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .actions { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 20px;
+        }
+
+        .action-btn { 
+            flex: 1; 
+            border: none; 
+            border-radius: 20px; 
+            font-size: 2rem; 
+            color: white; 
+            font-weight: 900;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .pass { 
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .success { 
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .pause-btn {
+            background: rgba(231, 76, 60, 0.8);
+            border: 2px solid rgba(231, 76, 60, 1);
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pause-btn:active {
+            transform: scale(0.95);
+            background: rgba(192, 57, 43, 0.9);
+        }
+
+        .undo-btn {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            padding: 12px 25px;
+            font-size: 1rem;
+            position: fixed;
+            bottom: 200px;
+            right: 20px;
+            border-radius: 15px;
+            z-index: 100;
+        }
+
+        /* === RESULTS === */
+        #results { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100%;
+            padding: 20px;
+        }
+
+        #final-score { 
+            font-size: 10rem; 
+            font-weight: 900;
+            text-shadow: 0 0 40px currentColor;
+            margin: 20px 0;
+        }
+
+        .bonus { 
+            color: #27ae60; 
+            font-size: 2.5rem; 
+            font-weight: 900;
+            text-transform: uppercase;
+            animation: bounceIn 0.6s;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .footer-controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* === PAUSE OVERLAY === */
+        #pause-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #pause-overlay h2 {
+            font-size: 4rem;
+            margin-bottom: 40px;
+        }
+
+        /* === WINNER SCREEN === */
+        #winner-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(20,20,20,0.95));
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .winner-trophy {
+            font-size: 8rem;
+            margin-bottom: 20px;
+        }
+
+        .winner-text {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            text-shadow: 0 0 40px currentColor;
+        }
+
+        .winner-final-score {
+            font-size: 2rem;
+            opacity: 0.8;
+            margin-bottom: 60px;
+        }
+
+        /* === READY POPUP === */
+        #ready-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 1500;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #ready-popup h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        #ready-popup p {
+            font-size: 1.5rem;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+
+        .settings-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: rgba(100,100,100,0.8);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 1000;
+            font-weight: 600;
+        }
+
+        .settings-btn:active {
+            transform: scale(0.95);
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 60px;
+            right: 15px;
+            background: rgba(0,0,0,0.95);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #444;
+            z-index: 999;
+            min-width: 300px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .settings-panel h3 {
+            margin: 0 0 20px 0;
+            font-size: 1.3rem;
+            color: #fff;
+        }
+
+        .settings-panel label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #ccc;
+        }
+
+        .settings-panel input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 2px solid #666;
+            background: #2a2a2a;
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .settings-close {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Battle Scoreboard -->
+    <div id="battle-score">
+        <div class="score-box">
+            <div class="score-label" style="color:var(--groom-color)">GROOM</div>
+            <div class="score-value" style="color:var(--groom-color)" id="total-groom">0</div>
+        </div>
+        <div class="score-box">
+            <div class="score-label" style="color:var(--bride-color)">BRIDE</div>
+            <div class="score-value" style="color:var(--bride-color)" id="total-bride">0</div>
+        </div>
+    </div>
+
+    <!-- Settings Button (Fixed Position) -->
+    <button class="settings-btn" onclick="toggleSettings()">⚙️ Settings</button>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="settings-panel" style="display:none;">
+        <h3>Game Settings</h3>
+        <label>Countdown Duration (seconds):</label>
+        <input type="number" id="countdown-setting" value="60" min="10" max="300" step="5">
+        
+        <label>Points Per Correct Guess:</label>
+        <input type="number" id="points-per-success" value="1" min="1" max="10" step="1">
+        
+        <label>Bonus Points (Perfect Set):</label>
+        <input type="number" id="bonus-points" value="2" min="0" max="20" step="1">
+        
+        <button class="settings-close" onclick="toggleSettings()">✓ Save & Close</button>
+    </div>
+
+    <!-- Menu -->
+    <div id="menu">
+        <h1>🎵 HOOKSTEP BATTLE 🎵</h1>
+        
+        <h3>ROUND 1</h3>
+        <div class="set-row">
+            <button class="btn groom" onclick="startSet(0, 'Groom')">Set 1 - Groom</button>
+            <button class="btn bride" onclick="startSet(0, 'Bride')">Set 2 - Bride</button>
+        </div>
+        
+        <h3>ROUND 2</h3>
+        <div class="set-row">
+            <button class="btn groom" onclick="startSet(1, 'Groom')">Set 3 - Groom</button>
+            <button class="btn bride" onclick="startSet(1, 'Bride')">Set 4 - Bride</button>
+        </div>
+        
+        <h3>ROUND 3</h3>
+        <div class="set-row">
+            <button class="btn groom" onclick="startSet(2, 'Groom')">Set 5 - Groom</button>
+            <button class="btn bride" onclick="startSet(2, 'Bride')">Set 6 - Bride</button>
+        </div>
+
+        <div class="footer-controls">
+            <button class="btn reset-btn" onclick="confirmReset('battle')">🔄 Reset Battle</button>
+            <button class="btn reset-btn" onclick="showWinner()">🏆 Declare Winner</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game">
+        <div class="stats">
+            <span id="side-label">GROOM</span>
+            <div class="timer-section">
+                <span id="timer">60</span>
+                <button class="btn pause-btn" onclick="togglePause()">⏸ PAUSE</button>
+            </div>
+            <span id="score">0</span>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <div class="card" id="card">
+            <div class="songs-remaining" id="songs-remaining">8 left</div>
+            <div id="song-name">Song Name</div>
+            <div id="movie-name">Movie Name</div>
+        </div>
+
+        <button class="btn undo-btn" id="undo-btn" onclick="handleUndo()" style="display:none">↶ UNDO</button>
+
+        <div class="actions">
+            <button class="action-btn pass" onclick="handlePass()">PASS</button>
+            <button class="action-btn success" onclick="handleSuccess()">✓ GOT IT</button>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results">
+        <h2>SET COMPLETE!</h2>
+        <div id="final-score">0</div>
+        <div id="bonus-notif" class="bonus" style="display:none">🎉 PERFECT! +2 BONUS 🎉</div>
+        
+        <div class="footer-controls">
+            <button class="btn" style="background: linear-gradient(135deg, #27ae60, #229954);" onclick="confirmGoMenu()">✓ Confirm & Add Score</button>
+            <button class="btn" style="background: linear-gradient(135deg, #e74c3c, #c0392b);" onclick="confirmRestartSet()">↻ Restart Set</button>
+        </div>
+    </div>
+
+    <!-- Pause Overlay -->
+    <div id="pause-overlay">
+        <h2>⏸ PAUSED</h2>
+        <button class="btn" style="background: linear-gradient(135deg, #27ae60, #229954); font-size: 1.5rem; padding: 20px 40px;" onclick="togglePause()">▶ RESUME</button>
+        <button class="btn reset-btn" style="margin-top: 20px;" onclick="confirmQuit()">Exit to Menu</button>
+    </div>
+
+    <!-- Winner Screen -->
+    <div id="winner-screen">
+        <div class="winner-trophy">🏆</div>
+        <div class="winner-text" id="winner-text">GROOM WINS!</div>
+        <div class="winner-final-score" id="winner-final-score">Groom: 24 | Bride: 18</div>
+        <button class="btn" style="background: linear-gradient(135deg, #27ae60, #229954); font-size: 1.5rem; padding: 20px 50px;" onclick="closeWinner()">Back to Menu</button>
+    </div>
+
+    <!-- Ready Popup -->
+    <div id="ready-popup">
+        <h2 id="ready-title">Ready for Set 1?</h2>
+        <p id="ready-info">Team: GROOM | Time: 60s</p>
+        <button class="btn" style="background: linear-gradient(135deg, #27ae60, #229954); font-size: 2rem; padding: 25px 60px;" onclick="confirmReady()">🎵 START!</button>
+    </div>
+
+    <script>
+        const sets = [
+            { // Round 1
+                Groom: [{s: "Gangnam Style", m: "PSY"}, {s: "Y.M.C.A.", m: "Village People"}, {s: "Jeena Ke Hain Chaar Din", m: "Mujhse Shaadi Karogi"}, {s: "Chaiyya Chaiyya", m: "Dil Se"}, {s: "Kaho Naa... Pyaar Hai", m: "Title Track"}, {s: "Hookah Bar", m: "Khiladi 786"}, {s: "Deewangi Deewangi", m: "Om Shanti Om"}, {s: "Janaab-e-Aali", m: "WAR 2"}],
+                Bride: [{s: "Macarena", m: "Los Del Rio"}, {s: "Waka Waka", m: "Shakira"}, {s: "Shava Shava", m: "Kabhi Khushi Kabhie Gham"}, {s: "London Thumakda", m: "Queen"}, {s: "Maahi Ve", m: "Kal Ho Naa Ho"}, {s: "Dola Re Dola", m: "Devdas"}, {s: "Ainvayi Ainvayi", m: "Band Bajaa Baraat"}, {s: "Asereje", m: "Las Ketchup"}]
+            },
+            { // Round 2
+                Groom: [{s: "Tauba Tauba", m: "Karan Aujla"}, {s: "Chaleya", m: "Jawan"}, {s: "Li Tourne", m: "Alain Ramanisum"}, {s: "Shararat", m: "Dhurandhar"}, {s: "Naatu Naatu", m: "RRR"}, {s: "Teri Baaton Mein Aisa Uljha Jiya", m: "Title Track"}, {s: "Sauda Khara Khara", m: "Good Newz"}, {s: "Jhoome Jo Pathaan", m: "Pathaan"}],
+                Bride: [{s: "Aaj Ki Raat", m: "Stree 2"}, {s: "What Jhumka?", m: "Rocky Aur Rani Kii Prem Kahaani"}, {s: "Touss Sali", m: "System R (Mr. Love)"}, {s: "Aayi Nai", m: "Stree 2"}, {s: "Garmi", m: "Street Dancer 3D"}, {s: "O Saki Saki", m: "Batla House"}, {s: "Param Sundari", m: "Mimi"}, {s: "Aankh Marey", m: "Simmba"}]
+            },
+            { // Round 3
+                Groom: [{s: "Muqabala", m: "Street Dancer 3D / Humse Hai Muqabala"}, {s: "Ek Pal Ka Jeena", m: "Kaho Naa... Pyaar Hai"}, {s: "Dhinka Chika", m: "Ready"}, {s: "Woh Ladki Hai Kahan", m: "Dil Chahta Hai"}, {s: "Beat It", m: "Michael Jackson"}, {s: "Desi Girl", m: "Dostana"}, {s: "Ghungroo", m: "WAR"}, {s: "Sharara Sharara", m: "Mere Yaar Ki Shaadi Hai"}],
+                Bride: [{s: "Dholida", m: "Gangubai Kathiawadi"}, {s: "Single Ladies", m: "Beyoncé"}, {s: "Badtameez Dil", m: "Yeh Jawaani Hai Deewani"}, {s: "Kajra Re", m: "Bunty Aur Babli"}, {s: "Thriller", m: "Michael Jackson"}, {s: "Chammak Challo", m: "Ra.One"}, {s: "Sheila Ki Jawaani", m: "Tees Maar Khan"}, {s: "Crazy Kiya Re", m: "Dhoom 2"}]
+            }
+        ];
+
+        let queue = [], currentScore = 0, time = 60, timerObj, isPaused = false;
+        let totalGroom = 0, totalBride = 0;
+        let currentRound = 0, currentSide = "";
+        let history = []; // For undo
+        const TOTAL_SONGS = 8;
+        let pendingRound = 0, pendingSide = "";
+
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function startSet(round, side) {
+            pendingRound = round;
+            pendingSide = side;
+            
+            const setNumber = round * 2 + (side === "Bride" ? 2 : 1);
+            const countdownValue = document.getElementById('countdown-setting').value;
+            
+            document.getElementById('ready-title').innerText = "Ready for Set " + setNumber + "?";
+            document.getElementById('ready-info').innerText = "Team: " + side.toUpperCase() + " | Time: " + countdownValue + "s";
+            document.getElementById('ready-popup').style.display = 'flex';
+        }
+
+        function confirmReady() {
+            document.getElementById('ready-popup').style.display = 'none';
+            
+            currentRound = pendingRound;
+            currentSide = pendingSide;
+            queue = [...sets[currentRound][currentSide]];
+            currentScore = 0; 
+            time = parseInt(document.getElementById('countdown-setting').value);
+            isPaused = false;
+            history = [];
+            
+            document.getElementById('side-label').innerText = currentSide.toUpperCase();
+            document.getElementById('side-label').style.color = currentSide === "Groom" ? "var(--groom-color)" : "var(--bride-color)";
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            document.getElementById('score').innerText = currentScore;
+            document.getElementById('undo-btn').style.display = 'none';
+            
+            updateProgress();
+            renderCard();
+            startTimer();
+        }
+
+        function renderCard() {
+            if (queue.length === 0) return endGame(true);
+            
+            const card = document.getElementById('card');
+            card.classList.remove('flash-success', 'flash-pass');
+            
+            document.getElementById('song-name').innerText = queue[0].s;
+            document.getElementById('movie-name').innerText = queue[0].m;
+            document.getElementById('songs-remaining').innerText = queue.length + " left";
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const completed = TOTAL_SONGS - queue.length;
+            const percent = (completed / TOTAL_SONGS) * 100;
+            document.getElementById('progress-fill').style.width = percent + "%";
+        }
+
+        function handleSuccess() {
+            if (isPaused) return;
+            
+            history.push({ action: 'success', queue: [...queue], score: currentScore });
+            document.getElementById('undo-btn').style.display = 'block';
+            
+            const card = document.getElementById('card');
+            card.classList.add('flash-success');
+            
+            const pointsPerSuccess = parseInt(document.getElementById('points-per-success').value);
+            currentScore += pointsPerSuccess;
+            document.getElementById('score').innerText = currentScore;
+            queue.shift();
+            
+            setTimeout(() => {
+                if (queue.length > 0) renderCard(); 
+                else endGame(true);
+            }, 300);
+        }
+
+        function handlePass() {
+            if (isPaused) return;
+            
+            history.push({ action: 'pass', queue: [...queue], score: currentScore });
+            document.getElementById('undo-btn').style.display = 'block';
+            
+            const card = document.getElementById('card');
+            card.classList.add('flash-pass');
+            
+            let item = queue.shift();
+            queue.push(item);
+            
+            setTimeout(() => renderCard(), 300);
+        }
+
+        function handleUndo() {
+            if (history.length === 0) return;
+            
+            const lastState = history.pop();
+            queue = [...lastState.queue];
+            currentScore = lastState.score;
+            document.getElementById('score').innerText = currentScore;
+            
+            if (history.length === 0) {
+                document.getElementById('undo-btn').style.display = 'none';
+            }
+            
+            renderCard();
+        }
+
+        function startTimer() {
+            document.getElementById('timer').innerText = time;
+            document.getElementById('timer').classList.remove('warning');
+            
+            timerObj = setInterval(() => {
+                if (isPaused) return;
+                
+                time--;
+                document.getElementById('timer').innerText = time;
+                
+                if (time <= 10) {
+                    document.getElementById('timer').classList.add('warning');
+                }
+                
+                if (time <= 0) endGame(false);
+            }, 1000);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pause-overlay').style.display = isPaused ? 'flex' : 'none';
+        }
+
+        function confirmQuit() {
+            if (confirm("Quit this set and return to menu? (Score will not be saved)")) {
+                clearInterval(timerObj);
+                isPaused = false;
+                document.getElementById('pause-overlay').style.display = 'none';
+                resetMenu();
+            }
+        }
+
+        function endGame(allDone) {
+            clearInterval(timerObj);
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('results').style.display = 'flex';
+            
+            let points = currentScore;
+            const bonusPoints = parseInt(document.getElementById('bonus-points').value);
+            
+            if (allDone && currentScore === 8 * parseInt(document.getElementById('points-per-success').value)) {
+                points += bonusPoints;
+                document.getElementById('bonus-notif').style.display = 'block';
+                document.getElementById('bonus-notif').innerText = `🎉 PERFECT! +${bonusPoints} BONUS 🎉`;
+            } else {
+                document.getElementById('bonus-notif').style.display = 'none';
+            }
+            
+            document.getElementById('final-score').innerText = points;
+            document.getElementById('final-score').style.color = currentSide === "Groom" ? "var(--groom-color)" : "var(--bride-color)";
+            document.getElementById('final-score').setAttribute('data-points', points);
+        }
+
+        function confirmGoMenu() {
+            const pointsToAdd = parseInt(document.getElementById('final-score').getAttribute('data-points'));
+            
+            if (confirm(`Add ${pointsToAdd} points to ${currentSide}'s total score?`)) {
+                console.log('Adding points:', pointsToAdd, 'to', currentSide);
+                console.log('Current totals - Groom:', totalGroom, 'Bride:', totalBride);
+                
+                if (currentSide === "Groom") {
+                    totalGroom += pointsToAdd;
+                    document.getElementById('total-groom').innerText = totalGroom;
+                    console.log('New Groom total:', totalGroom);
+                } else {
+                    totalBride += pointsToAdd;
+                    document.getElementById('total-bride').innerText = totalBride;
+                    console.log('New Bride total:', totalBride);
+                }
+                
+                resetMenu();
+            }
+        }
+
+        function confirmRestartSet() {
+            if (confirm("Restart this set? Your current score will be discarded.")) {
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('ready-popup').style.display = 'none';
+                
+                // Restart immediately without ready screen
+                queue = [...sets[currentRound][currentSide]];
+                currentScore = 0;
+                time = parseInt(document.getElementById('countdown-setting').value);
+                isPaused = false;
+                history = [];
+                
+                document.getElementById('menu').style.display = 'none';
+                document.getElementById('game').style.display = 'flex';
+                document.getElementById('score').innerText = currentScore;
+                document.getElementById('undo-btn').style.display = 'none';
+                
+                updateProgress();
+                renderCard();
+                startTimer();
+            }
+        }
+
+        function confirmReset(type) {
+            if (type === 'battle') {
+                if (confirm("⚠️ RESET ENTIRE BATTLE?\n\nThis will erase all scores for both teams.\n\nGroom: " + totalGroom + " → 0\nBride: " + totalBride + " → 0")) {
+                    totalGroom = 0; 
+                    totalBride = 0;
+                    document.getElementById('total-groom').innerText = "0";
+                    document.getElementById('total-bride').innerText = "0";
+                    console.log('Battle reset - Groom:', totalGroom, 'Bride:', totalBride);
+                }
+            }
+        }
+
+        function showWinner() {
+            if (totalGroom === 0 && totalBride === 0) {
+                alert("No scores yet! Play some sets first.");
+                return;
+            }
+            
+            const winnerScreen = document.getElementById('winner-screen');
+            const winnerText = document.getElementById('winner-text');
+            const finalScore = document.getElementById('winner-final-score');
+            
+            if (totalGroom > totalBride) {
+                winnerText.innerText = "🎉 GROOM WINS! 🎉";
+                winnerText.style.color = "var(--groom-color)";
+            } else if (totalBride > totalGroom) {
+                winnerText.innerText = "🎉 BRIDE WINS! 🎉";
+                winnerText.style.color = "var(--bride-color)";
+            } else {
+                winnerText.innerText = "🤝 IT'S A TIE! 🤝";
+                winnerText.style.color = "#f39c12";
+            }
+            
+            finalScore.innerText = "Groom: " + totalGroom + " | Bride: " + totalBride;
+            winnerScreen.style.display = 'flex';
+        }
+
+        function closeWinner() {
+            document.getElementById('winner-screen').style.display = 'none';
+        }
+
+        function resetMenu() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('menu').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
