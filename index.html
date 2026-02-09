@@ -683,7 +683,25 @@
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
 
+        function closeSettings() {
+            document.getElementById('settings-panel').style.display = 'none';
+        }
+
+        // Close settings when clicking outside
+        document.addEventListener('click', function(event) {
+            const settingsBtn = document.querySelector('.settings-btn');
+            const settingsPanel = document.getElementById('settings-panel');
+            
+            if (settingsPanel.style.display === 'block') {
+                if (!settingsPanel.contains(event.target) && !settingsBtn.contains(event.target)) {
+                    closeSettings();
+                }
+            }
+        });
+
         function startSet(round, side) {
+            closeSettings(); // Close settings when starting a set
+            
             pendingRound = round;
             pendingSide = side;
             
@@ -896,6 +914,8 @@
         }
 
         function showWinner() {
+            closeSettings(); // Close settings when showing winner
+            
             if (totalGroom === 0 && totalBride === 0) {
                 alert("No scores yet! Play some sets first.");
                 return;
@@ -925,6 +945,7 @@
         }
 
         function resetMenu() {
+            closeSettings(); // Close settings when returning to menu
             document.getElementById('results').style.display = 'none';
             document.getElementById('menu').style.display = 'flex';
         }
