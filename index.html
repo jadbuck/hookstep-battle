@@ -114,6 +114,26 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
+        .btn.played {
+            opacity: 0.3;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .btn.played::after {
+            content: '✓ PLAYED';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1rem;
+            font-weight: 900;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
         .groom { background: linear-gradient(135deg, #0056b3 0%, #003d82 100%); }
         .bride { background: linear-gradient(135deg, #d81b60 0%, #a8154a 100%); }
         
@@ -568,22 +588,20 @@
     <div id="menu">
         <h1>🎵 HOOKSTEP BATTLE 🎵</h1>
         
-        <h3>ROUND 1</h3>
+        <h3>CHOOSE YOUR SET</h3>
         <div class="set-row">
-            <button class="btn groom" onclick="startSet(0, 'Groom')">Set 1 - Groom</button>
-            <button class="btn bride" onclick="startSet(0, 'Bride')">Set 2 - Bride</button>
+            <button class="btn" id="set-btn-0" style="background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%);" onclick="startSet(0)">Set 1</button>
+            <button class="btn" id="set-btn-1" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);" onclick="startSet(1)">Set 2</button>
         </div>
         
-        <h3>ROUND 2</h3>
         <div class="set-row">
-            <button class="btn groom" onclick="startSet(1, 'Groom')">Set 3 - Groom</button>
-            <button class="btn bride" onclick="startSet(1, 'Bride')">Set 4 - Bride</button>
+            <button class="btn" id="set-btn-2" style="background: linear-gradient(135deg, #16a085 0%, #117a65 100%);" onclick="startSet(2)">Set 3</button>
+            <button class="btn" id="set-btn-3" style="background: linear-gradient(135deg, #c0392b 0%, #922b21 100%);" onclick="startSet(3)">Set 4</button>
         </div>
         
-        <h3>ROUND 3</h3>
         <div class="set-row">
-            <button class="btn groom" onclick="startSet(2, 'Groom')">Set 5 - Groom</button>
-            <button class="btn bride" onclick="startSet(2, 'Bride')">Set 6 - Bride</button>
+            <button class="btn" id="set-btn-4" style="background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);" onclick="startSet(4)">Set 5</button>
+            <button class="btn" id="set-btn-5" style="background: linear-gradient(135deg, #d4ac0d 0%, #b7950b 100%);" onclick="startSet(5)">Set 6</button>
         </div>
 
         <div class="footer-controls">
@@ -595,7 +613,7 @@
     <!-- Game Screen -->
     <div id="game">
         <div class="stats">
-            <span id="side-label">GROOM</span>
+            <span id="side-label">SET 1</span>
             <div class="timer-section">
                 <span id="timer">60</span>
                 <button class="btn pause-btn" onclick="togglePause()">⏸ PAUSE</button>
@@ -651,32 +669,54 @@
     <!-- Ready Popup -->
     <div id="ready-popup">
         <h2 id="ready-title">Ready for Set 1?</h2>
-        <p id="ready-info">Team: GROOM | Time: 60s</p>
+        <p id="ready-info">Time: 60s</p>
         <button class="btn" style="background: linear-gradient(135deg, #27ae60, #229954); font-size: 2rem; padding: 25px 60px;" onclick="confirmReady()">🎵 START!</button>
     </div>
 
     <script>
-        const sets = [
-            { // Round 1
-                Groom: [{s: "Gangnam Style", m: "PSY"}, {s: "Y.M.C.A.", m: "Village People"}, {s: "Jeena Ke Hain Chaar Din", m: "Mujhse Shaadi Karogi"}, {s: "Chaiyya Chaiyya", m: "Dil Se"}, {s: "Kaho Naa... Pyaar Hai", m: "Title Track"}, {s: "Hookah Bar", m: "Khiladi 786"}, {s: "Deewangi Deewangi", m: "Om Shanti Om"}, {s: "Janaab-e-Aali", m: "WAR 2"}],
-                Bride: [{s: "Macarena", m: "Los Del Rio"}, {s: "Waka Waka", m: "Shakira"}, {s: "Shava Shava", m: "Kabhi Khushi Kabhie Gham"}, {s: "London Thumakda", m: "Queen"}, {s: "Maahi Ve", m: "Kal Ho Naa Ho"}, {s: "Dola Re Dola", m: "Devdas"}, {s: "Ainvayi Ainvayi", m: "Band Bajaa Baraat"}, {s: "Asereje", m: "Las Ketchup"}]
-            },
-            { // Round 2
-                Groom: [{s: "Tauba Tauba", m: "Karan Aujla"}, {s: "Chaleya", m: "Jawan"}, {s: "Li Tourne", m: "Alain Ramanisum"}, {s: "Shararat", m: "Dhurandhar"}, {s: "Naatu Naatu", m: "RRR"}, {s: "Teri Baaton Mein Aisa Uljha Jiya", m: "Title Track"}, {s: "Sauda Khara Khara", m: "Good Newz"}, {s: "Jhoome Jo Pathaan", m: "Pathaan"}],
-                Bride: [{s: "Aaj Ki Raat", m: "Stree 2"}, {s: "What Jhumka?", m: "Rocky Aur Rani Kii Prem Kahaani"}, {s: "Touss Sali", m: "System R (Mr. Love)"}, {s: "Aayi Nai", m: "Stree 2"}, {s: "Garmi", m: "Street Dancer 3D"}, {s: "O Saki Saki", m: "Batla House"}, {s: "Param Sundari", m: "Mimi"}, {s: "Aankh Marey", m: "Simmba"}]
-            },
-            { // Round 3
-                Groom: [{s: "Muqabala", m: "Street Dancer 3D / Humse Hai Muqabala"}, {s: "Ek Pal Ka Jeena", m: "Kaho Naa... Pyaar Hai"}, {s: "Dhinka Chika", m: "Ready"}, {s: "Woh Ladki Hai Kahan", m: "Dil Chahta Hai"}, {s: "Beat It", m: "Michael Jackson"}, {s: "Desi Girl", m: "Dostana"}, {s: "Ghungroo", m: "WAR"}, {s: "Sharara Sharara", m: "Mere Yaar Ki Shaadi Hai"}],
-                Bride: [{s: "Dholida", m: "Gangubai Kathiawadi"}, {s: "Single Ladies", m: "Beyoncé"}, {s: "Badtameez Dil", m: "Yeh Jawaani Hai Deewani"}, {s: "Kajra Re", m: "Bunty Aur Babli"}, {s: "Thriller", m: "Michael Jackson"}, {s: "Chammak Challo", m: "Ra.One"}, {s: "Sheila Ki Jawaani", m: "Tees Maar Khan"}, {s: "Crazy Kiya Re", m: "Dhoom 2"}]
-            }
+        // All 6 sets as a flat array
+        const allSets = [
+            // Set 1
+            [{s: "Gangnam Style", m: "PSY"}, {s: "Y.M.C.A.", m: "Village People"}, {s: "Jeena Ke Hain Chaar Din", m: "Mujhse Shaadi Karogi"}, {s: "Chaiyya Chaiyya", m: "Dil Se"}, {s: "Kaho Naa... Pyaar Hai", m: "Title Track"}, {s: "Hookah Bar", m: "Khiladi 786"}, {s: "Deewangi Deewangi", m: "Om Shanti Om"}, {s: "Janaab-e-Aali", m: "WAR 2"}],
+            
+            // Set 2
+            [{s: "Macarena", m: "Los Del Rio"}, {s: "Waka Waka", m: "Shakira"}, {s: "Shava Shava", m: "Kabhi Khushi Kabhie Gham"}, {s: "London Thumakda", m: "Queen"}, {s: "Maahi Ve", m: "Kal Ho Naa Ho"}, {s: "Dola Re Dola", m: "Devdas"}, {s: "Ainvayi Ainvayi", m: "Band Bajaa Baraat"}, {s: "Asereje", m: "Las Ketchup"}],
+            
+            // Set 3
+            [{s: "Tauba Tauba", m: "Karan Aujla"}, {s: "Chaleya", m: "Jawan"}, {s: "Li Tourne", m: "Alain Ramanisum"}, {s: "Shararat", m: "Dhurandhar"}, {s: "Naatu Naatu", m: "RRR"}, {s: "Teri Baaton Mein Aisa Uljha Jiya", m: "Title Track"}, {s: "Sauda Khara Khara", m: "Good Newz"}, {s: "Jhoome Jo Pathaan", m: "Pathaan"}],
+            
+            // Set 4
+            [{s: "Aaj Ki Raat", m: "Stree 2"}, {s: "What Jhumka?", m: "Rocky Aur Rani Kii Prem Kahaani"}, {s: "Touss Sali", m: "System R (Mr. Love)"}, {s: "Aayi Nai", m: "Stree 2"}, {s: "Garmi", m: "Street Dancer 3D"}, {s: "O Saki Saki", m: "Batla House"}, {s: "Param Sundari", m: "Mimi"}, {s: "Aankh Marey", m: "Simmba"}],
+            
+            // Set 5
+            [{s: "Muqabala", m: "Street Dancer 3D / Humse Hai Muqabala"}, {s: "Ek Pal Ka Jeena", m: "Kaho Naa... Pyaar Hai"}, {s: "Dhinka Chika", m: "Ready"}, {s: "Woh Ladki Hai Kahan", m: "Dil Chahta Hai"}, {s: "Beat It", m: "Michael Jackson"}, {s: "Desi Girl", m: "Dostana"}, {s: "Ghungroo", m: "WAR"}, {s: "Sharara Sharara", m: "Mere Yaar Ki Shaadi Hai"}],
+            
+            // Set 6
+            [{s: "Dholida", m: "Gangubai Kathiawadi"}, {s: "Single Ladies", m: "Beyoncé"}, {s: "Badtameez Dil", m: "Yeh Jawaani Hai Deewani"}, {s: "Kajra Re", m: "Bunty Aur Babli"}, {s: "Thriller", m: "Michael Jackson"}, {s: "Chammak Challo", m: "Ra.One"}, {s: "Sheila Ki Jawaani", m: "Tees Maar Khan"}, {s: "Crazy Kiya Re", m: "Dhoom 2"}]
         ];
 
         let queue = [], currentScore = 0, time = 60, timerObj, isPaused = false;
         let totalGroom = 0, totalBride = 0;
-        let currentRound = 0, currentSide = "";
+        let currentSetIndex = 0;
         let history = []; // For undo
         const TOTAL_SONGS = 8;
-        let pendingRound = 0, pendingSide = "";
+        let pendingSetIndex = 0;
+        
+        // Track which sets have been played
+        let playedSets = new Set();
+
+        function updateSetButtons() {
+            for (let i = 0; i < 6; i++) {
+                const btn = document.getElementById(`set-btn-${i}`);
+                if (playedSets.has(i)) {
+                    btn.classList.add('played');
+                    btn.disabled = true;
+                } else {
+                    btn.classList.remove('played');
+                    btn.disabled = false;
+                }
+            }
+        }
 
         function toggleSettings() {
             const panel = document.getElementById('settings-panel');
@@ -699,33 +739,35 @@
             }
         });
 
-        function startSet(round, side) {
-            closeSettings(); // Close settings when starting a set
+        function startSet(setIndex) {
+            // Check if set has already been played
+            if (playedSets.has(setIndex)) {
+                alert("This set has already been played! Please choose a different set.");
+                return;
+            }
             
-            pendingRound = round;
-            pendingSide = side;
+            closeSettings();
             
-            const setNumber = round * 2 + (side === "Bride" ? 2 : 1);
+            pendingSetIndex = setIndex;
             const countdownValue = document.getElementById('countdown-setting').value;
             
-            document.getElementById('ready-title').innerText = "Ready for Set " + setNumber + "?";
-            document.getElementById('ready-info').innerText = "Team: " + side.toUpperCase() + " | Time: " + countdownValue + "s";
+            document.getElementById('ready-title').innerText = "Ready for Set " + (setIndex + 1) + "?";
+            document.getElementById('ready-info').innerText = "Time: " + countdownValue + "s";
             document.getElementById('ready-popup').style.display = 'flex';
         }
 
         function confirmReady() {
             document.getElementById('ready-popup').style.display = 'none';
             
-            currentRound = pendingRound;
-            currentSide = pendingSide;
-            queue = [...sets[currentRound][currentSide]];
+            currentSetIndex = pendingSetIndex;
+            queue = [...allSets[currentSetIndex]];
             currentScore = 0; 
             time = parseInt(document.getElementById('countdown-setting').value);
             isPaused = false;
             history = [];
             
-            document.getElementById('side-label').innerText = currentSide.toUpperCase();
-            document.getElementById('side-label').style.color = currentSide === "Groom" ? "var(--groom-color)" : "var(--bride-color)";
+            document.getElementById('side-label').innerText = "SET " + (currentSetIndex + 1);
+            document.getElementById('side-label').style.color = "#fff";
             document.getElementById('menu').style.display = 'none';
             document.getElementById('game').style.display = 'flex';
             document.getElementById('score').innerText = currentScore;
@@ -853,29 +895,28 @@
             }
             
             document.getElementById('final-score').innerText = points;
-            document.getElementById('final-score').style.color = currentSide === "Groom" ? "var(--groom-color)" : "var(--bride-color)";
+            document.getElementById('final-score').style.color = "#fff";
             document.getElementById('final-score').setAttribute('data-points', points);
         }
 
         function confirmGoMenu() {
             const pointsToAdd = parseInt(document.getElementById('final-score').getAttribute('data-points'));
             
-            if (confirm(`Add ${pointsToAdd} points to ${currentSide}'s total score?`)) {
-                console.log('Adding points:', pointsToAdd, 'to', currentSide);
-                console.log('Current totals - Groom:', totalGroom, 'Bride:', totalBride);
-                
-                if (currentSide === "Groom") {
-                    totalGroom += pointsToAdd;
-                    document.getElementById('total-groom').innerText = totalGroom;
-                    console.log('New Groom total:', totalGroom);
-                } else {
-                    totalBride += pointsToAdd;
-                    document.getElementById('total-bride').innerText = totalBride;
-                    console.log('New Bride total:', totalBride);
-                }
-                
-                resetMenu();
+            const teamChoice = confirm(`Add ${pointsToAdd} points to:\n\nOK = GROOM\nCancel = BRIDE`);
+            
+            if (teamChoice) {
+                totalGroom += pointsToAdd;
+                document.getElementById('total-groom').innerText = totalGroom;
+            } else {
+                totalBride += pointsToAdd;
+                document.getElementById('total-bride').innerText = totalBride;
             }
+            
+            // Mark this set as played
+            playedSets.add(currentSetIndex);
+            updateSetButtons();
+            
+            resetMenu();
         }
 
         function confirmRestartSet() {
@@ -884,7 +925,7 @@
                 document.getElementById('ready-popup').style.display = 'none';
                 
                 // Restart immediately without ready screen
-                queue = [...sets[currentRound][currentSide]];
+                queue = [...allSets[currentSetIndex]];
                 currentScore = 0;
                 time = parseInt(document.getElementById('countdown-setting').value);
                 isPaused = false;
@@ -903,18 +944,19 @@
 
         function confirmReset(type) {
             if (type === 'battle') {
-                if (confirm("⚠️ RESET ENTIRE BATTLE?\n\nThis will erase all scores for both teams.\n\nGroom: " + totalGroom + " → 0\nBride: " + totalBride + " → 0")) {
+                if (confirm("⚠️ RESET ENTIRE BATTLE?\n\nThis will erase all scores for both teams AND reset all sets.\n\nGroom: " + totalGroom + " → 0\nBride: " + totalBride + " → 0")) {
                     totalGroom = 0; 
                     totalBride = 0;
+                    playedSets.clear(); // Reset played sets
                     document.getElementById('total-groom').innerText = "0";
                     document.getElementById('total-bride').innerText = "0";
-                    console.log('Battle reset - Groom:', totalGroom, 'Bride:', totalBride);
+                    updateSetButtons();
                 }
             }
         }
 
         function showWinner() {
-            closeSettings(); // Close settings when showing winner
+            closeSettings();
             
             if (totalGroom === 0 && totalBride === 0) {
                 alert("No scores yet! Play some sets first.");
@@ -945,7 +987,7 @@
         }
 
         function resetMenu() {
-            closeSettings(); // Close settings when returning to menu
+            closeSettings();
             document.getElementById('results').style.display = 'none';
             document.getElementById('menu').style.display = 'flex';
         }
